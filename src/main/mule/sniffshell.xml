@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="243a62b3-d767-48d1-a153-798448e663e5" >
+		<http:listener-connection host="0.0.0.0" port="8091" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="fbe1ae6d-6803-4683-823b-e2a1d9273ea7" >
+		<http:listener-connection protocol="HTTPS" host="0.0.0.0" port="8092" tlsContext="TLS_Context"/>
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e233a719-499c-41c1-88a8-c847cb7de25f" >
+		<http:request-connection host="www.google.com" port="80" />
+	</http:request-config>
+	<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="0b94c792-174f-42f3-80e9-e079060a5a2d" >
+		<tls:key-store type="jks" path="sniffshell.jks" alias="mykeyalias" keyPassword="mule123" password="mule123" />
+	</tls:context>
+	<flow name="sniffshellFlowHTTP" doc:id="0cb98ca9-b02d-4c43-8684-be2f3ef2db90" >
+		<http:listener doc:name="Listener" doc:id="2f4dca27-c1fd-4572-9d8d-53d0ed6fe8d6" config-ref="HTTP_Listener_config" path="/shell"/>
+		<flow-ref doc:name="Flow Reference" doc:id="cfb78d52-5a00-4938-a4cc-7732f2a40202" name="sniffshellSub_Flow"/>
+	</flow>
+	<flow name="sniffshellFlowHTTPS" doc:id="c4eaaa8f-746b-4ad1-b62f-c9f5c3e198df" >
+		<http:listener doc:name="Listener" doc:id="79ae1172-698e-4929-8ffa-909f065b7164" config-ref="HTTP_Listener_config1" path="/shell"/>
+		<flow-ref doc:name="Flow Reference" doc:id="27638317-ce93-4579-abf7-decfc295e6fd" name="sniffshellSub_Flow"/>
+	</flow>
+	<flow name="googleFlowHTTP" doc:id="65018b1e-9e32-440d-b588-9f17ce7de6ee" >
+		<http:listener doc:name="Listener" doc:id="d99814e0-ae56-4ba7-9330-24c1bccee235" config-ref="HTTP_Listener_config" path="/google"/>
+		<http:request method="GET" doc:name="Request" doc:id="5d4416ee-6691-47b5-8ce0-448161a19404" config-ref="HTTP_Request_configuration" path="/"/>
+	</flow>
+	<flow name="googleFlowHTTPS" doc:id="99b7a02b-409a-4848-992d-5526cce364fc" >
+		<http:listener doc:name="Listener" doc:id="5a9e8b71-f8c0-4540-9a81-c19130db8b67" config-ref="HTTP_Listener_config1" path="/google"/>
+		<http:request method="GET" doc:name="Request" doc:id="26671660-4b70-4288-b218-eb63ff1380d0" config-ref="HTTP_Request_configuration" path="/"/>
+	</flow>
+
+	<sub-flow name="sniffshellSub_Flow" doc:id="afd7f839-81bf-47ab-a6e4-0d3e1f64047f" >
+		<ee:transform doc:name="Transform Message" doc:id="98407945-4776-4692-b370-dd9a44f47683">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import java!com::automationdirect::sniffshell::ExecShellCommand
+output application/java
+---
+ExecShellCommand::executeCommand(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5465389d-0509-45f5-973c-cb61df23689b" message="#[payload]" />
+	</sub-flow>
+</mule>
