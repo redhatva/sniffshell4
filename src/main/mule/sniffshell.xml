@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:java="http://www.mulesoft.org/schema/mule/java"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="243a62b3-d767-48d1-a153-798448e663e5" >
 		<http:listener-connection host="0.0.0.0" port="8091" />
 	</http:listener-config>
@@ -22,6 +23,16 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 	<http:request-config name="HTTP_Request_configurationChicken" doc:name="HTTP Request configuration" doc:id="59c61f81-fece-4c8b-b10d-3461ab5ce772" >
 		<http:request-connection protocol="HTTPS" host="www.ipchicken.com" port="443" />
 	</http:request-config>
+	<http:listener-config name="HTTP_Listener_configpublic" doc:name="HTTP Listener config" doc:id="b30c591b-7fcb-4261-b26e-18afe7f0941e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="67d0718a-0482-4f65-9aa8-24d45fb2e6fa" >
+		<salesforce:basic-connection username="robert.huddleston+proxy@mulesoft.com" password="@ppl3S@uc3" securityToken="GlZNRXBYZevLMhURn7mnuitS" />
+	</salesforce:sfdc-config>	
+	<flow name="sniffshellFlow" doc:id="b097f7bd-1503-4166-b6c4-aaf11ebe1ce4" >
+		<http:listener doc:name="Listener" doc:id="4d6bbee4-14bc-4f34-98bc-19340194a83a" config-ref="HTTP_Listener_configpublic" path="/shell"/>
+		<flow-ref doc:name="Copy_of_Flow Reference" doc:id="d3022859-3cd2-4119-84cf-e180b5953ac4" name="sniffshellSub_Flow" />
+	</flow>
 	<flow name="sniffshellFlowHTTP" doc:id="0cb98ca9-b02d-4c43-8684-be2f3ef2db90" >
 		<http:listener doc:name="Listener" doc:id="2f4dca27-c1fd-4572-9d8d-53d0ed6fe8d6" config-ref="HTTP_Listener_config" path="/shell"/>
 		<flow-ref doc:name="Flow Reference" doc:id="cfb78d52-5a00-4938-a4cc-7732f2a40202" name="sniffshellSub_Flow"/>
@@ -40,11 +51,21 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 	</flow>
 	<flow name="ipchickenFlowHTTP" doc:id="c1a31327-ecdb-4dac-b8bf-452a92238b8b" >
 		<http:listener doc:name="Listener" doc:id="e960b9b0-31e0-41c9-a868-fdbb6ae87f7f" config-ref="HTTP_Listener_config" path="/chicken"/>
+		<java:invoke-static method="setSocks()" doc:name="Invoke static" doc:id="d240a78e-8fc4-45b8-b4d2-98609b1e00cf" class="com.automationdirect.sniffshell.PlayWithProxy"/>
 		<http:request method="GET" doc:name="Request" doc:id="941e93e3-20e3-4888-8f22-0263b13d5b55" config-ref="HTTP_Request_configurationChicken" path="/"/>
+		<logger level="INFO" doc:name="Logger" doc:id="7d9537d6-157c-40aa-bc42-887662da6efc" />
+		<java:invoke-static method="setHTTP()" doc:name="Invoke static" doc:id="a0d5dc19-f954-4eb4-bb67-13ead4c71bc0" class="com.automationdirect.sniffshell.PlayWithProxy"/>
+		<http:request method="GET" doc:name="Copy_of_Request" doc:id="8d2ad37f-617c-458a-8b32-a58ef92eb3a9" config-ref="HTTP_Request_configurationChicken" path="/" />
+		<java:invoke-static method="debug()" doc:name="Invoke static" doc:id="202965e2-5806-428f-ad1b-0685009c7aca" class="com.automationdirect.sniffshell.PlayWithProxy"/>
+		<logger level="INFO" doc:name="Logger" doc:id="537c4574-55fe-44b7-99b0-c7f8337d2fda" message="#[payload]"/>
 	</flow>
 	<flow name="ipchickenFlowHTTPS" doc:id="de11ddd8-12c4-4440-bb56-0e3686d176fd" >
 		<http:listener doc:name="Listener" doc:id="179bcea3-7e5f-4605-b9a6-e8e8dde5ca0c" config-ref="HTTP_Listener_config1" path="/chicken"/>
 		<http:request method="GET" doc:name="Request" doc:id="24ca2f8f-565b-413c-9ed6-efb57900dc53" config-ref="HTTP_Request_configurationChicken" path="/"/>
+	</flow>
+	<flow name="ipchickenFlowpublic" doc:id="20870200-9005-49f6-9cc3-8864746ba895" >
+		<http:listener doc:name="Listener" doc:id="51cbf182-bd64-4656-81d0-5b4ef47ff7eb" config-ref="HTTP_Listener_configpublic" path="/chicken"/>
+		<http:request method="GET" doc:name="Request" doc:id="d6c67bb8-65c8-4a71-9974-359fc8cb13d5" config-ref="HTTP_Request_configurationChicken" path="/"/>
 	</flow>
 
 	<sub-flow name="sniffshellSub_Flow" doc:id="afd7f839-81bf-47ab-a6e4-0d3e1f64047f" >
@@ -59,4 +80,46 @@ ExecShellCommand::executeCommand(payload)]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="5465389d-0509-45f5-973c-cb61df23689b" message="#[payload]" />
 	</sub-flow>
+	<flow name="forcehttp" doc:id="7d78c4eb-ac3c-4aa2-84e5-1aacb512e4ab" >
+		<http:listener doc:name="Copy_of_Listener" doc:id="b5dfdd99-5072-46bf-b5ea-8f368c03f656" config-ref="HTTP_Listener_config" path="/chicken" />
+		<salesforce:query-all doc:name="Query all" doc:id="572ade64-8ba6-4712-96c9-b047f939b4d1" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id from Account]]></salesforce:salesforce-query>
+		</salesforce:query-all>
+		<ee:transform doc:name="Transform Message" doc:id="08ac53a3-30f5-4181-8a43-216b8c13b045" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>		
+	</flow>
+	<flow name="forcehttps" doc:id="d646dfa4-666f-448f-b519-0dab87963a4b" >
+		<http:listener doc:name="Copy_of_Listener" doc:id="f6e6c5bd-d961-4f0a-855d-d73a43e45398" config-ref="HTTP_Listener_config1" path="/chicken" />
+		<salesforce:query-all doc:name="Query all" doc:id="98e472b3-2b19-488b-ba49-8b5e5db5a640" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id from Account]]></salesforce:salesforce-query>
+		</salesforce:query-all>
+		<ee:transform doc:name="Transform Message" doc:id="2d371eae-2eb1-4b3d-b57b-7f9890d7c249" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="forcepublic" doc:id="127a4148-200d-45d7-9e1a-10e51c656032" >
+		<http:listener doc:name="Copy_of_Listener" doc:id="0f9aeffc-3834-4250-ae15-d8d237123e54" config-ref="HTTP_Listener_configpublic" path="/chicken" />
+		<salesforce:query-all doc:name="Query all" doc:id="f6febfe9-b904-4ecb-a3bd-95002cf218e7" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id from Account]]></salesforce:salesforce-query>
+		</salesforce:query-all>
+		<ee:transform doc:name="Transform Message" doc:id="b2e6878e-e462-45de-b6c6-33f96e9b6605" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 </mule>
