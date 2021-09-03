@@ -81,7 +81,7 @@ ExecShellCommand::executeCommand(payload)]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="5465389d-0509-45f5-973c-cb61df23689b" message="#[payload]" />
 	</sub-flow>
 	<flow name="forcehttp" doc:id="7d78c4eb-ac3c-4aa2-84e5-1aacb512e4ab" >
-		<http:listener doc:name="Copy_of_Listener" doc:id="b5dfdd99-5072-46bf-b5ea-8f368c03f656" config-ref="HTTP_Listener_config" path="/chicken" />
+		<http:listener doc:name="Copy_of_Listener" doc:id="b5dfdd99-5072-46bf-b5ea-8f368c03f656" config-ref="HTTP_Listener_config" path="/force" />
 		<salesforce:query-all doc:name="Query all" doc:id="572ade64-8ba6-4712-96c9-b047f939b4d1" config-ref="Salesforce_Config">
 			<salesforce:salesforce-query ><![CDATA[SELECT Id from Account]]></salesforce:salesforce-query>
 		</salesforce:query-all>
@@ -95,7 +95,7 @@ payload]]></ee:set-payload>
 		</ee:transform>		
 	</flow>
 	<flow name="forcehttps" doc:id="d646dfa4-666f-448f-b519-0dab87963a4b" >
-		<http:listener doc:name="Copy_of_Listener" doc:id="f6e6c5bd-d961-4f0a-855d-d73a43e45398" config-ref="HTTP_Listener_config1" path="/chicken" />
+		<http:listener doc:name="Copy_of_Listener" doc:id="f6e6c5bd-d961-4f0a-855d-d73a43e45398" config-ref="HTTP_Listener_config1" path="/force" />
 		<salesforce:query-all doc:name="Query all" doc:id="98e472b3-2b19-488b-ba49-8b5e5db5a640" config-ref="Salesforce_Config">
 			<salesforce:salesforce-query ><![CDATA[SELECT Id from Account]]></salesforce:salesforce-query>
 		</salesforce:query-all>
@@ -109,7 +109,7 @@ payload]]></ee:set-payload>
 		</ee:transform>
 	</flow>
 	<flow name="forcepublic" doc:id="127a4148-200d-45d7-9e1a-10e51c656032" >
-		<http:listener doc:name="Copy_of_Listener" doc:id="0f9aeffc-3834-4250-ae15-d8d237123e54" config-ref="HTTP_Listener_configpublic" path="/chicken" />
+		<http:listener doc:name="Copy_of_Listener" doc:id="0f9aeffc-3834-4250-ae15-d8d237123e54" config-ref="HTTP_Listener_configpublic" path="/force" />
 		<salesforce:query-all doc:name="Query all" doc:id="f6febfe9-b904-4ecb-a3bd-95002cf218e7" config-ref="Salesforce_Config">
 			<salesforce:salesforce-query ><![CDATA[SELECT Id from Account]]></salesforce:salesforce-query>
 		</salesforce:query-all>
